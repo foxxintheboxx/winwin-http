@@ -4,10 +4,10 @@ const mongoose = require('mongoose');
 
 const app = require('./webapp');
 
-mongoose.connect(process.env.DB);
+mongoose.connect(process.env.MONGODB_URI || process.env.DB);
 
 const server = http.createServer(app);
-server.listen(6021, () => {
-    console.log('Express server listening on *:' + 6021);
+server.listen(process.env.PORT || 6021, () => {
+    console.log('Express server listening on *:' + process.env.PORT);
 });
 
