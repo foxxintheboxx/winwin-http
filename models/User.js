@@ -18,10 +18,12 @@ const UserSchema = new mongoose.Schema({
     },
     uid: {
         type: String,
+        required: true,
         unique: true
     },
     ds_key: {
         type: String,
+        required: true,
         unique: true
     },
     __ds: {
@@ -51,7 +53,12 @@ const UserSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    role : {
+        type: String,
+        required: true,
+        default: "user"
+    },
 });
 
 // Middleware executed before save - hash the user's password
@@ -71,7 +78,6 @@ UserSchema.pre('save', function(next) {
 
             // override the cleartext password with the hashed one
             self.password = hash;
-            console.log(self.password);
             next();
         });
     });

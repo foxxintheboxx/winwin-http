@@ -13,12 +13,14 @@ exports.auth = function(request, response) {
   User.findOne({ "username": username}).exec((err, user) =>  {
       const sendResp = (err, success) => {
         if (err || !success) return next(); //404
+        console.log(user.role);
         const role = user.role ? user.role : "user" //FIX
+        console.log(role);
         if (success) {
           response.json({
               username,
               clientData: user,
-              serverData: { uid: user.uid, role }
+              serverData: { uid: user.uid, role: role }
           });
         }
       }
@@ -31,20 +33,23 @@ exports.create = function(request, response) {
     var params = request.body;
 
     // Create a new user based on form parameters
+    const uid = utils.getUid();
     var user = new User({
         username: params.username,
         phone: params.phone,
         countryCode: params.countryCode,
         password: params.password,
-        uid: utils.getUid()
+        ds_key: uid,
+        uid
     });
 
-    user.save().then( (doc) => {
-        if (doc !== null) {
+    user.save((err) => {
+        console.log(err);
+        if (err === null) {
             // If the user is created successfully, send them an account
             // verification token
             console.log("save");
-            response.json({ user: doc });
+            response.json({ user });
 //            user.sendAuthyToken(function(err) {
 //                if (err) {
 //                    request.flash('errors', 'There was a problem sending '
