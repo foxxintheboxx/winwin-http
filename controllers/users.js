@@ -2,14 +2,13 @@ const utils = require('../utils.js');
 var User = require('../models/User');
 
 // authentication a user
-exports.auth = function(request, response) {
+exports.auth = function(request, response, next) {
   const params = request.body;
   console.log(params);
   const authData = params.authData; // deepstream packs everythin into an authData obj
   const pw = authData.password;
   const username = authData.username;
 
-  console.log(username);
   User.findOne({ "username": username}).exec((err, user) =>  {
       const sendResp = (err, success) => {
         if (err || !success) return next(); //404
