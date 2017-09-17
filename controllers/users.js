@@ -17,9 +17,9 @@ exports.auth = function(request, response, next) {
         console.log(role);
         if (success) {
           response.json({
-              username,
-              clientData: user,
-              serverData: { uid: user.uid, role: role }
+            username,
+            clientData: user,
+            serverData: { uid: user.uid, role: role }
           });
         }
       }
@@ -29,36 +29,52 @@ exports.auth = function(request, response, next) {
 
 // create a new user based on the form submission
 exports.create = function(request, response) {
-    var params = request.body;
-
-    // Create a new user based on form parameters
+    const params = request.body;
+    const username = params.username;
     const uid = utils.getUid();
-    var user = new User({
-        username: params.username,
-        phone: params.phone,
-        countryCode: params.countryCode,
-        password: params.password,
-        ds_key: uid,
-        uid
-    });
+    const countryCode = params.countryCode;
+    const password = params.password;
+    const phone = params.phone;
 
-    user.save((err) => {
-        console.log(err);
-        if (err === null) {
-            // If the user is created successfully, send them an account
-            // verification token
-            console.log("save");
-            response.json({ user });
-//            user.sendAuthyToken(function(err) {
-//                if (err) {
-//                    request.flash('errors', 'There was a problem sending '
-//                        + 'your token - sorry :(');
-//                }
-//
-//                // Send to token verification page
-//                response.json({ user: doc });
-//            });
-        }
+
+    User.count({ username }, (err, count) => {
+      // Create a new user based on form parameters
+      if (count === 0) {
+        User.count({ phone }, (err, count) => {
+          if (count === 0) {
+            const user = new User({
+              username,
+              phone,
+              countryCode,
+              password,
+              ds_key: uid,
+              uid
+            });
+            user.save((err) => {
+                console.log(err);
+                if (err === null) {
+                  // If the user is created successfully, send them an account
+                  // verification token
+                  console.log("save");
+                  response.json({ user });
+        //          user.sendAuthyToken(function(err) {
+        //              if (err) {
+        //                  request.flash('errors', 'There was a problem sending '
+        //                      + 'your token - sorry :(');
+        //              }
+        //
+        //              // Send to token verification page
+        //              response.json({ user: doc });
+        //          });
+                }
+            });
+          } else {
+            response.status(400).json({error: "phone"});
+          }
+        });
+      } else {
+        response.status(400).json({error: "username"});
+      }
     });
 };
 
